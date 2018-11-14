@@ -5,7 +5,6 @@ namespace Vich\UploaderBundle\Handler;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Vich\UploaderBundle\Event\Event;
 use Vich\UploaderBundle\Event\Events;
-use Vich\UploaderBundle\Injector\FileInjectorInterface;
 use Vich\UploaderBundle\Mapping\PropertyMappingFactory;
 use Vich\UploaderBundle\Storage\StorageInterface;
 use SplObjectStorage;
@@ -19,11 +18,6 @@ use SplObjectStorage;
 class RemoveHandler extends AbstractHandler
 {
     /**
-     * @var FileInjectorInterface
-     */
-    protected $injector;
-
-    /**
      * @var EventDispatcherInterface
      */
     protected $dispatcher;
@@ -33,11 +27,10 @@ class RemoveHandler extends AbstractHandler
      */
     protected $queue;
 
-    public function __construct(PropertyMappingFactory $factory, StorageInterface $storage, FileInjectorInterface $injector, EventDispatcherInterface $dispatcher)
+    public function __construct(PropertyMappingFactory $factory, StorageInterface $storage, EventDispatcherInterface $dispatcher)
     {
         parent::__construct($factory, $storage);
 
-        $this->injector = $injector;
         $this->dispatcher = $dispatcher;
         $this->queue = new SplObjectStorage();
     }
