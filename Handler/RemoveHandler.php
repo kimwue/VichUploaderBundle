@@ -43,13 +43,14 @@ class RemoveHandler extends AbstractHandler
     }
 
     /**
-     * Adds file to queue which will be removed during postFlush event.
+     * Adds file to remove-queue (which will be removed during postFlush event).
      *
      * @param $obj
      * @param string $fieldName
      */
     public function addToQueue($obj, string $fieldName): void
     {
+        $mapping = $this->getMapping($obj, $fieldName);
         $fieldNames = [$fieldName];
 
         if ($this->queue->contains($obj)) {
@@ -57,7 +58,35 @@ class RemoveHandler extends AbstractHandler
             $fieldNames = array_merge($fieldNames, $data['fieldNames']);
         }
 
+        $this->dispatch(Events::PRE_ADD_REMOVE_QUEUE, new Event($obj, $mapping));
+
         $this->queue->attach($obj, ['fieldNames' => $fieldNames]);
+
+        $this->dispatch(Events::POST_ADD_REMOVE_QUEUE, new Event($obj, $mapping));
+    }
+
+    /**
+     * Removes whole object or specified fieldName from remove-queue
+     *
+     * @param $obj
+     * @param string $fieldName
+     */
+    public function removeFromQueue($obj, string $fieldName = null): void
+    {
+        if (null === $fieldName) {
+            $this->queue->detach($obj);
+        } else {
+            foreach ($this->queue as $item) {
+                $data = $this->queue->getInfo();
+
+                if (array_key_exists($fieldName, $data['fieldNames'])) {
+                    unset($data['fieldNames'][$fieldName]);
+                }
+
+                $this->queue->detach($item);
+                $this->queue->attach($item, $data);
+            }
+        }
     }
 
     /**
@@ -77,7 +106,7 @@ class RemoveHandler extends AbstractHandler
             }
 
             $updatedEntities[] = $obj;
-            $this->queue->detach($obj);
+            $this->removeFromQueue($obj);
         }
 
         return $updatedEntities;
