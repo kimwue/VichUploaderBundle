@@ -83,6 +83,16 @@ class RemoveHandler extends AbstractHandler
     }
 
     /**
+     * Returns remove-queue
+     * 
+     * @return SplObjectStorage
+     */
+    public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    /**
      * Removes all files in queue. Will return array of updated entities to be persisted.
      *
      * @return array list of updated entities
